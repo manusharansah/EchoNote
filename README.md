@@ -56,9 +56,9 @@ This results in:
   ↳ Extracts key decisions, action items, attendees
         ↓
 📄 PDF Generation (ReportLab)
-  ↳ Creates professionally formatted PDF
+  ↳ Creates professionally formatted PDF minutes (draft)  
         ↓
-✏️ User Reviews & Edits (Optional)
+✏️ User Reviews & Edits
   ↳ Edit markdown, regenerate PDF
         ↓
 💾 Download & Share

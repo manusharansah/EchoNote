@@ -1,4 +1,4 @@
-# national-ai-hackathon-2026-team-zapped# 🎯 Meeting Minutes AI - National AI Hackathon 2026
+# 🎯 Meeting Minutes AI - National AI Hackathon 2026
 
 > **Team Zapped** - AI-powered meeting transcription and minutes generation  
 > **Technologies**: FastAPI, Whisper, Ollama, ReportLab, React

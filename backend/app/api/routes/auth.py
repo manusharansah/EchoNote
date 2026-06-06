@@ -1,6 +1,8 @@
 from fastapi import APIRouter, HTTPException, Depends, status
 from sqlalchemy.orm import Session
 import httpx
+import base64
+import json
 
 from app.db.database import get_db
 from app.models.user import User
@@ -73,17 +75,22 @@ async def google_callback(payload: GoogleCallbackRequest, db: Session = Depends(
     and either sign in or register the user.
     """
     # 1. Exchange code for Google tokens
-    async with httpx.AsyncClient() as client:
-        token_resp = await client.post(
-            "https://oauth2.googleapis.com/token",
-            data={
-                "code": payload.code,
-                "client_id": settings.GOOGLE_CLIENT_ID,
-                "client_secret": settings.GOOGLE_CLIENT_SECRET,
-                "redirect_uri": settings.GOOGLE_REDIRECT_URI,
-                "grant_type": "authorization_code",
-            },
-        )
+    try:
+        async with httpx.AsyncClient(timeout=10.0) as client:
+            token_resp = await client.post(
+                "https://oauth2.googleapis.com/token",
+                data={
+                    "code": payload.code,
+                    "client_id": settings.GOOGLE_CLIENT_ID,
+                    "client_secret": settings.GOOGLE_CLIENT_SECRET,
+                    "redirect_uri": settings.GOOGLE_REDIRECT_URI,
+                    "grant_type": "authorization_code",
+                },
+            )
+    except httpx.ConnectTimeout:
+        raise HTTPException(status_code=503, detail="Could not reach Google — check your internet connection")
+    except httpx.RequestError as e:
+        raise HTTPException(status_code=503, detail=f"Network error: {str(e)}")
 
     if token_resp.status_code != 200:
         raise HTTPException(status_code=400, detail="Failed to exchange Google code")
@@ -91,12 +98,10 @@ async def google_callback(payload: GoogleCallbackRequest, db: Session = Depends(
     google_tokens = token_resp.json()
     id_token = google_tokens.get("id_token")
 
-    # 2. Decode the ID token to get user info (no signature verification needed
-    #    here since we just got it directly from Google)
-    import base64, json as json_lib
+    # 2. Decode the ID token to get user info
     parts = id_token.split(".")
     padded = parts[1] + "=" * (4 - len(parts[1]) % 4)
-    user_info = json_lib.loads(base64.urlsafe_b64decode(padded))
+    user_info = json.loads(base64.urlsafe_b64decode(padded))
 
     google_id  = user_info["sub"]
     email      = user_info.get("email", "")
@@ -106,13 +111,11 @@ async def google_callback(payload: GoogleCallbackRequest, db: Session = Depends(
     # 3. Upsert user
     user = db.query(User).filter(User.google_id == google_id).first()
     if not user:
-        # Maybe they registered with email first
         user = db.query(User).filter(User.email == email).first()
 
     if user:
-        # Update Google fields if missing
-        user.google_id   = google_id
-        user.avatar_url  = avatar_url or user.avatar_url
+        user.google_id     = google_id
+        user.avatar_url    = avatar_url or user.avatar_url
         user.auth_provider = "google"
     else:
         user = User(

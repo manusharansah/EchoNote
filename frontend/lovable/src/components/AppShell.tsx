@@ -4,10 +4,12 @@ import { Logo } from "@/components/Logo";
 import { Button } from "@/components/ui/button";
 import type { ReactNode } from "react";
 import { cn } from "@/lib/utils";
+import { useAuth } from "@/lib/auth-context";
 
 export function AppShell({ children }: { children: ReactNode }) {
   const navigate = useNavigate();
   const pathname = useRouterState({ select: (s) => s.location.pathname });
+  const { logout } = useAuth();
 
   const navItems = [
     { to: "/meetings", label: "Meetings" },
@@ -43,7 +45,10 @@ export function AppShell({ children }: { children: ReactNode }) {
           <Button
             variant="ghost"
             size="sm"
-            onClick={() => navigate({ to: "/login" })}
+            onClick={() => {
+              logout();
+              navigate({ to: "/login" });
+            }}
             className="text-muted-foreground"
           >
             <LogOut className="h-4 w-4" />
@@ -59,9 +64,7 @@ export function AppShell({ children }: { children: ReactNode }) {
                 to={item.to}
                 className={cn(
                   "rounded-md px-3 py-1.5 text-sm font-medium",
-                  active
-                    ? "bg-accent text-accent-foreground"
-                    : "text-muted-foreground",
+                  active ? "bg-accent text-accent-foreground" : "text-muted-foreground",
                 )}
               >
                 {item.label}

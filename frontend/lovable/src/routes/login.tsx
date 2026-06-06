@@ -4,13 +4,19 @@ import { GoogleButton } from "@/components/GoogleButton";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import type { FormEvent } from "react";
+import { useState } from "react";
+import { useLogin } from "@/hooks/use-api";
+import { toast } from "sonner";
+import { api } from "@/lib/api";
 
 export const Route = createFileRoute("/login")({
   head: () => ({
     meta: [
       { title: "Sign in — MeetingIQ" },
-      { name: "description", content: "Sign in to MeetingIQ to manage your meetings, transcripts and minutes." },
+      {
+        name: "description",
+        content: "Sign in to MeetingIQ to manage your meetings, transcripts and minutes.",
+      },
     ],
   }),
   component: LoginPage,
@@ -18,9 +24,30 @@ export const Route = createFileRoute("/login")({
 
 function LoginPage() {
   const navigate = useNavigate();
-  const onSubmit = (e: FormEvent) => {
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const loginMutation = useLogin();
+
+  const onGoogle = async () => {
+    try {
+      const { url } = await api.auth.getGoogleUrl();
+      window.location.href = url;
+    } catch (error) {
+      const message = error instanceof Error ? error.message : "Google sign-in failed";
+      toast.error(message);
+    }
+  };
+
+  const onSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    navigate({ to: "/meetings" });
+    try {
+      await loginMutation.mutateAsync({ email, password });
+      toast.success("Signed in successfully!");
+      navigate({ to: "/meetings" });
+    } catch (error) {
+      const message = error instanceof Error ? error.message : "Login failed";
+      toast.error(message);
+    }
   };
 
   return (
@@ -38,7 +65,7 @@ function LoginPage() {
               </p>
             </div>
 
-            <GoogleButton label="Continue with Google" />
+            <GoogleButton label="Continue with Google" onClick={onGoogle} />
 
             <div className="my-6 flex items-center gap-3 text-xs uppercase tracking-wide text-muted-foreground">
               <div className="h-px flex-1 bg-border" />
@@ -49,7 +76,15 @@ function LoginPage() {
             <form onSubmit={onSubmit} className="space-y-4">
               <div className="space-y-1.5">
                 <Label htmlFor="email">Email</Label>
-                <Input id="email" type="email" placeholder="you@company.com" required />
+                <Input
+                  id="email"
+                  type="email"
+                  placeholder="you@company.com"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  required
+                  disabled={loginMutation.isPending}
+                />
               </div>
               <div className="space-y-1.5">
                 <div className="flex items-center justify-between">
@@ -58,10 +93,18 @@ function LoginPage() {
                     Forgot password?
                   </a>
                 </div>
-                <Input id="password" type="password" placeholder="••••••••" required />
+                <Input
+                  id="password"
+                  type="password"
+                  placeholder="••••••••"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  required
+                  disabled={loginMutation.isPending}
+                />
               </div>
-              <Button type="submit" className="h-11 w-full">
-                Sign In
+              <Button type="submit" className="h-11 w-full" disabled={loginMutation.isPending}>
+                {loginMutation.isPending ? "Signing in..." : "Sign In"}
               </Button>
             </form>
 
@@ -74,8 +117,8 @@ function LoginPage() {
           </div>
 
           <p className="mt-6 px-2 text-center text-xs leading-relaxed text-muted-foreground">
-            By using MeetingIQ, you agree to process only meetings where participants
-            have provided consent.
+            By using MeetingIQ, you agree to process only meetings where participants have provided
+            consent.
           </p>
         </div>
       </div>

@@ -15,6 +15,8 @@ import { Route as NewMeetingRouteImport } from './routes/new-meeting'
 import { Route as MeetingsRouteImport } from './routes/meetings'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as MeetingsMeetingIdRouteImport } from './routes/meetings.$meetingId'
+import { Route as AuthCallbackRouteImport } from './routes/auth.callback'
 
 const SignupRoute = SignupRouteImport.update({
   id: '/signup',
@@ -46,31 +48,47 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const MeetingsMeetingIdRoute = MeetingsMeetingIdRouteImport.update({
+  id: '/$meetingId',
+  path: '/$meetingId',
+  getParentRoute: () => MeetingsRoute,
+} as any)
+const AuthCallbackRoute = AuthCallbackRouteImport.update({
+  id: '/auth/callback',
+  path: '/auth/callback',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/login': typeof LoginRoute
-  '/meetings': typeof MeetingsRoute
+  '/meetings': typeof MeetingsRouteWithChildren
   '/new-meeting': typeof NewMeetingRoute
   '/processing': typeof ProcessingRoute
   '/signup': typeof SignupRoute
+  '/auth/callback': typeof AuthCallbackRoute
+  '/meetings/$meetingId': typeof MeetingsMeetingIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/login': typeof LoginRoute
-  '/meetings': typeof MeetingsRoute
+  '/meetings': typeof MeetingsRouteWithChildren
   '/new-meeting': typeof NewMeetingRoute
   '/processing': typeof ProcessingRoute
   '/signup': typeof SignupRoute
+  '/auth/callback': typeof AuthCallbackRoute
+  '/meetings/$meetingId': typeof MeetingsMeetingIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/login': typeof LoginRoute
-  '/meetings': typeof MeetingsRoute
+  '/meetings': typeof MeetingsRouteWithChildren
   '/new-meeting': typeof NewMeetingRoute
   '/processing': typeof ProcessingRoute
   '/signup': typeof SignupRoute
+  '/auth/callback': typeof AuthCallbackRoute
+  '/meetings/$meetingId': typeof MeetingsMeetingIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -81,8 +99,18 @@ export interface FileRouteTypes {
     | '/new-meeting'
     | '/processing'
     | '/signup'
+    | '/auth/callback'
+    | '/meetings/$meetingId'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/login' | '/meetings' | '/new-meeting' | '/processing' | '/signup'
+  to:
+    | '/'
+    | '/login'
+    | '/meetings'
+    | '/new-meeting'
+    | '/processing'
+    | '/signup'
+    | '/auth/callback'
+    | '/meetings/$meetingId'
   id:
     | '__root__'
     | '/'
@@ -91,15 +119,18 @@ export interface FileRouteTypes {
     | '/new-meeting'
     | '/processing'
     | '/signup'
+    | '/auth/callback'
+    | '/meetings/$meetingId'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   LoginRoute: typeof LoginRoute
-  MeetingsRoute: typeof MeetingsRoute
+  MeetingsRoute: typeof MeetingsRouteWithChildren
   NewMeetingRoute: typeof NewMeetingRoute
   ProcessingRoute: typeof ProcessingRoute
   SignupRoute: typeof SignupRoute
+  AuthCallbackRoute: typeof AuthCallbackRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -146,16 +177,43 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/meetings/$meetingId': {
+      id: '/meetings/$meetingId'
+      path: '/$meetingId'
+      fullPath: '/meetings/$meetingId'
+      preLoaderRoute: typeof MeetingsMeetingIdRouteImport
+      parentRoute: typeof MeetingsRoute
+    }
+    '/auth/callback': {
+      id: '/auth/callback'
+      path: '/auth/callback'
+      fullPath: '/auth/callback'
+      preLoaderRoute: typeof AuthCallbackRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
+
+interface MeetingsRouteChildren {
+  MeetingsMeetingIdRoute: typeof MeetingsMeetingIdRoute
+}
+
+const MeetingsRouteChildren: MeetingsRouteChildren = {
+  MeetingsMeetingIdRoute: MeetingsMeetingIdRoute,
+}
+
+const MeetingsRouteWithChildren = MeetingsRoute._addFileChildren(
+  MeetingsRouteChildren,
+)
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   LoginRoute: LoginRoute,
-  MeetingsRoute: MeetingsRoute,
+  MeetingsRoute: MeetingsRouteWithChildren,
   NewMeetingRoute: NewMeetingRoute,
   ProcessingRoute: ProcessingRoute,
   SignupRoute: SignupRoute,
+  AuthCallbackRoute: AuthCallbackRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

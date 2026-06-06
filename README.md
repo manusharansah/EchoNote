@@ -267,33 +267,9 @@ This project was created for the National AI Hackathon 2026.
 
 **Team Zapped** - National AI Hackathon 2026
 
-### Contributors
-- Architecture & Backend
-- Frontend & UI
-- AI/ML Integration
-- Documentation
 
 ---
 
-## 🚀 Ready to Start?
-
-### Quick Decision Tree
-
-```
-Are you new to the project?
-├─ YES → Read: START_HERE.md
-│
-Are you ready to set up?
-├─ YES → Read: backend/QUICK_START.md
-│
-Something not working?
-├─ YES → Read: backend/MINUTES_GENERATION_TROUBLESHOOTING.md
-│
-Want technical details?
-├─ YES → Read: MINUTES_GENERATION_ANALYSIS.md
-```
-
----
 
 ## 📈 Roadmap
 

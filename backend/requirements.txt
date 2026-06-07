@@ -1,37 +1,12 @@
-# Web framework
-fastapi==0.115.0
-uvicorn[standard]==0.30.6
-
-# Database
-sqlalchemy==2.0.35
-# For async SQLAlchemy (optional upgrade path)
-aiosqlite==0.20.0
-
-# Auth & Security
+fastapi==0.111.0
+uvicorn[standard]==0.29.0
+sqlalchemy==2.0.30
 python-jose[cryptography]==3.3.0
-argon2-cffi==23.1.0  # Replaces passlib/bcrypt
-python-multipart==0.0.12      # Required for UploadFile
-
-# Settings
-pydantic-settings==2.5.2
-pydantic[email]==2.9.2
-
-# HTTP client (Google OAuth token exchange)
-httpx==0.27.2
-
-# PDF generation
-reportlab==4.2.2
-
-# AI / ML
-# Whisper (local) — uncomment if using local model:
-openai-whisper==20240930
-torch==2.4.1               # Required by whisper (CPU build)
-
-# OpenAI API (for Whisper API mode) — uncomment if needed:
-# openai==1.51.0
-
-# Ollama is accessed via HTTP (httpx above), no extra package needed
-
-# Dev / testing
-pytest==8.3.3
-httpx==0.27.2                 # Also used for TestClient
+passlib[bcrypt]==1.7.4
+python-multipart==0.0.9
+openai==1.30.1
+httpx==0.27.0
+reportlab==4.1.0
+python-dotenv==1.0.1
+pydantic-settings==2.2.1
+authlib==1.3.0

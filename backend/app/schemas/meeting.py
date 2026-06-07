@@ -1,46 +1,50 @@
-from pydantic import BaseModel, Field
-from typing import Optional
+from pydantic import BaseModel
 from datetime import datetime
+from typing import Optional, List
+from app.models.meeting import MeetingStatus
 
 
 class MeetingCreate(BaseModel):
-    """Create a new meeting"""
-    title: str = Field(..., min_length=1)
-
-
-class MeetingOut(BaseModel):
-    """Meeting response model"""
-    id: int
-    owner_id: int
     title: str
-    status: str
-    audio_path: Optional[str] = None
-    pdf_path: Optional[str] = None
+
+
+class MeetingResponse(BaseModel):
+    id: int
+    title: str
+    status: MeetingStatus
     transcript: Optional[str] = None
     markdown: Optional[str] = None
+    pdf_path: Optional[str] = None
     error_message: Optional[str] = None
     created_at: datetime
     completed_at: Optional[datetime] = None
-    updated_at: datetime
 
-    model_config = {"from_attributes": True}
+    class Config:
+        from_attributes = True
 
 
-class MeetingStatusOut(BaseModel):
-    """Meeting status response (lightweight polling)"""
+class MeetingListItem(BaseModel):
     id: int
-    status: str
-    error_message: Optional[str] = None
+    title: str
+    status: MeetingStatus
+    created_at: datetime
     completed_at: Optional[datetime] = None
 
-    model_config = {"from_attributes": True}
+    class Config:
+        from_attributes = True
 
 
-class UpdateTitleRequest(BaseModel):
-    """Update meeting title"""
-    title: str = Field(..., min_length=1)
+class MeetingListResponse(BaseModel):
+    meetings: List[MeetingListItem]
+    total: int
 
 
-class UpdateMarkdownRequest(BaseModel):
-    """Update meeting markdown minutes"""
-    markdown: str = Field(..., min_length=1)
+class MeetingStatusResponse(BaseModel):
+    id: int
+    status: MeetingStatus
+    progress_pct: int
+    error_message: Optional[str] = None
+
+
+class MeetingMarkdownUpdate(BaseModel):
+    markdown: str

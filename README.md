@@ -1,31 +1,13 @@
-# 🎯 Meeting Minutes AI - National AI Hackathon 2026
+# 🎯 EchoNote - National AI Hackathon 2026
 
 > **Team Zapped** - AI-powered meeting transcription and minutes generation  
-> **Status**: ✅ Production-ready with full documentation  
 > **Technologies**: FastAPI, Whisper, Ollama, ReportLab, React
-
----
-
-## 📖 Table of Contents
-
-1. [Project Overview](#project-overview)
-2. [Problem Statement](#problem-statement)
-3. [Our Solution](#our-solution)
-4. [Key Features](#key-features)
-5. [Architecture](#architecture)
-6. [Tech Stack](#tech-stack)
-7. [Quick Start](#quick-start)
-8. [Project Structure](#project-structure)
-9. [Setup & Deployment](#setup--deployment)
-10. [Recent Fixes](#recent-fixes)
-11. [Documentation](#documentation)
-12. [Team](#team)
 
 ---
 
 ## 📱 Project Overview
 
-**Meeting Minutes AI** is an intelligent application that automatically transcribes meeting audio, generates structured meeting minutes using AI, and produces professional PDF documents—all without requiring any manual intervention.
+**EchoNote** is an intelligent application that automatically transcribes meeting audio, generates structured meeting minutes using AI, and produces professional PDF documents—all without requiring any manual intervention.
 
 ### Use Cases
 - 📞 Remote team meetings
@@ -59,7 +41,7 @@ This results in:
 
 ## ✅ Our Solution
 
-### Meeting Minutes AI: A Complete Workflow
+### EchoNote: A Complete Workflow
 
 ```
 📱 User Records Meeting
@@ -74,9 +56,9 @@ This results in:
   ↳ Extracts key decisions, action items, attendees
         ↓
 📄 PDF Generation (ReportLab)
-  ↳ Creates professionally formatted PDF
+  ↳ Creates professionally formatted PDF minutes (draft)  
         ↓
-✏️ User Reviews & Edits (Optional)
+✏️ User Reviews & Edits
   ↳ Edit markdown, regenerate PDF
         ↓
 💾 Download & Share
@@ -121,78 +103,10 @@ This results in:
 
 ---
 
-## ✨ Key Features
-
-### For Users
-- ✅ **One-click recording** - Native browser recording
-- ✅ **Automatic processing** - No manual steps required
-- ✅ **Live progress tracking** - See pipeline status in real-time
-- ✅ **Professional output** - PDF-ready minutes
-- ✅ **Easy editing** - Markdown editor with live preview
-- ✅ **Fast results** - 30-60 seconds per meeting
-- ✅ **Privacy-first** - Local processing, no data leaks
-
-### For Developers
-- 🔧 **Well-documented** - 7 comprehensive guides
-- 📚 **Clean architecture** - Modular, easy to extend
-- 🧪 **Error handling** - Comprehensive error messages
-- 📊 **Configurable** - Environment-based settings
-- 🔐 **Secure** - JWT auth, input validation
-- 🚀 **Scalable** - Background task processing
-- 📝 **Logged** - Detailed pipeline logs
-
----
-
 ## 🏗️ Architecture
 
 ### High-Level Flow
-
-```
-┌─────────────┐
-│   Frontend  │ (React + Vite)
-│  - Record   │
-│  - Upload   │
-│  - Edit     │
-└──────┬──────┘
-       │ HTTP
-       ↓
-┌──────────────────────────────────────┐
-│         FastAPI Backend              │
-│  ┌────────────────────────────────┐  │
-│  │ Audio Upload Endpoint          │  │
-│  │ - Validate audio               │  │
-│  │ - Store to disk                │  │
-│  └────────┬───────────────────────┘  │
-│           ↓                           │
-│  ┌────────────────────────────────┐  │
-│  │ Background Pipeline            │  │
-│  │ ├─ Stage 1: Transcribe         │  │
-│  │ │  (Whisper)                   │  │
-│  │ ├─ Stage 2: Summarize          │  │
-│  │ │  (Ollama LLM)                │  │
-│  │ └─ Stage 3: Generate PDF       │  │
-│  │    (ReportLab)                 │  │
-│  └────────┬───────────────────────┘  │
-│           ↓                           │
-│  ┌────────────────────────────────┐  │
-│  │ Status Endpoints               │  │
-│  │ - Check progress               │  │
-│  │ - Get markdown                 │  │
-│  │ - Download PDF                 │  │
-│  └────────────────────────────────┘  │
-│           ↑                           │
-│           │ Poll every 2s             │
-│           └───────────────────────────┘
-│                                       │
-│  Database: SQLite                    │
-│  - Users, Meetings, Status Tracking  │
-└──────────────────────────────────────┘
-       ↑                ↑
-       │ HTTP          │ HTTP
-       │                │
-   Frontend          External Services
-                     (Optional: OpenAI API)
-```
+![System Architecture](System%20Architecture.png)
 
 ### Database Schema
 
@@ -239,247 +153,11 @@ meetings
 - **State**: React Context + Hooks
 - **Editor**: Markdown editor with live preview
 
-### DevOps
-- **Server**: Uvicorn + Docker-ready
-- **Database**: SQLite (development), PostgreSQL (production-ready)
-- **Deployment**: Self-hosted or cloud-ready
 
 ---
 
-## 🚀 Quick Start
 
-### Prerequisites
-- Python 3.9+
-- Node.js 16+
-- Ollama installed
-- Git
 
-### 5-Minute Setup
-
-#### Backend
-```bash
-cd backend
-cp .env.example .env
-pip install -r requirements.txt
-```
-
-#### Ollama
-```bash
-# Install from https://ollama.ai
-ollama serve  # Terminal #1
-```
-
-#### Start Backend
-```bash
-# Terminal #2
-cd backend
-uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
-```
-
-#### Frontend
-```bash
-# Terminal #3
-cd frontend/lovable
-npm install
-npm run dev
-```
-
-**Expected Output:**
-```
-✅ Ollama is reachable at http://localhost:11434 with model 'llama3'
-```
-
-Then open `http://localhost:5173` in browser → Start recording! 🎉
-
----
-
-## 📁 Project Structure
-
-```
-national-ai-hackathon-2026-team-zapped/
-│
-├── 📄 README.md (this file)
-├── 📄 START_HERE.md (navigation guide)
-├── 📄 QUICK_REFERENCE.md (copy-paste commands)
-├── 📄 MINUTES_GENERATION_ANALYSIS.md (technical deep-dive)
-├── 📄 FIX_SUMMARY.txt (what was fixed)
-│
-├── 📁 backend/
-│   ├── 📄 .env.example (configuration template)
-│   ├── 📄 QUICK_START.md (5-min backend setup)
-│   ├── 📄 FIXES_APPLIED.md (all fixes explained)
-│   ├── 📄 MINUTES_GENERATION_TROUBLESHOOTING.md (debugging)
-│   ├── requirements.txt
-│   │
-│   └── 📁 app/
-│       ├── main.py (FastAPI app + startup)
-│       ├── 📁 api/
-│       │   └── routes/
-│       │       ├── auth.py (login/signup)
-│       │       ├── meetings.py (CRUD operations)
-│       │       ├── audio.py (upload + pipeline)
-│       │       └── minutes.py (markdown/PDF)
-│       ├── 📁 services/
-│       │   ├── whisper_service.py (transcription)
-│       │   ├── ollama_service.py (summarization)
-│       │   ├── pdf_generator.py (PDF creation)
-│       │   └── pipeline.py (orchestration)
-│       ├── 📁 models/
-│       │   ├── user.py
-│       │   └── meeting.py
-│       ├── 📁 schemas/
-│       │   └── meeting.py
-│       ├── 📁 db/
-│       │   └── database.py
-│       └── 📁 core/
-│           ├── config.py
-│           └── security.py
-│
-└── 📁 frontend/
-    └── 📁 lovable/
-        ├── package.json
-        ├── 📁 src/
-        │   ├── App.tsx
-        │   ├── 📁 pages/
-        │   │   ├── LoginPage.tsx
-        │   │   ├── RecorderPage.tsx
-        │   │   ├── MinutesEditorPage.tsx
-        │   │   └── MeetingsListPage.tsx
-        │   ├── 📁 components/
-        │   │   ├── AudioRecorder.tsx
-        │   │   ├── MarkdownEditor.tsx
-        │   │   └── PipelineProgress.tsx
-        │   └── 📁 services/
-        │       └── api.ts
-        └── vite.config.ts
-```
-
----
-
-## 🔧 Setup & Deployment
-
-### Development Setup
-See: `backend/QUICK_START.md` or `START_HERE.md`
-
-### Production Deployment
-- Use PostgreSQL instead of SQLite
-- Set `DEBUG=False` in `.env`
-- Use proper JWT secret
-- Enable HTTPS
-- Configure CORS properly
-- Set up Docker container
-
-See deployment guides in documentation for detailed steps.
-
----
-
-## 🔨 Recent Fixes (v1.1)
-
-We identified and fixed **5 critical issues** that were preventing minutes generation:
-
-### Issues Fixed
-| Issue | Impact | Status |
-|-------|--------|--------|
-| Weak error messages | Users don't know how to fix issues | ✅ Fixed |
-| No pre-flight checks | Wastes time if Ollama missing | ✅ Fixed |
-| No startup diagnostics | Silent failures | ✅ Fixed |
-| Missing config template | Users confused about setup | ✅ Fixed |
-| Poor data validation | Doesn't catch empty results | ✅ Fixed |
-
-### What Changed
-- ✅ **Better error handling** - Specific, actionable messages
-- ✅ **Pre-flight checks** - Fails fast if dependencies missing
-- ✅ **Startup diagnostics** - Shows ✅ or ⚠️ for each service
-- ✅ **Complete documentation** - 7 comprehensive guides
-- ✅ **Data validation** - Catches issues early
-
-**See**: `MINUTES_GENERATION_ANALYSIS.md` for full technical details
-
----
-
-## 📚 Documentation
-
-### For Getting Started
-1. **`START_HERE.md`** - Navigation guide (5 min)
-2. **`QUICK_REFERENCE.md`** - Copy-paste commands (quick lookup)
-3. **`backend/QUICK_START.md`** - Step-by-step setup (10 min)
-
-### For Understanding
-4. **`FIX_SUMMARY.txt`** - What was fixed and why (15 min)
-5. **`MINUTES_GENERATION_ANALYSIS.md`** - Technical deep-dive (30 min)
-6. **`backend/FIXES_APPLIED.md`** - Detailed fix explanations (20 min)
-
-### For Troubleshooting
-7. **`backend/MINUTES_GENERATION_TROUBLESHOOTING.md`** - Debugging guide (reference)
-
-### Configuration
-8. **`backend/.env.example`** - All settings explained
-
----
-
-## 🎯 Key Design Decisions
-
-### 1. Local LLM (Ollama) vs Cloud API
-**Why Ollama?**
-- ✅ Privacy - No data sent to external servers
-- ✅ Cost - No per-request fees
-- ✅ Control - Run any model locally
-- ✅ Speed - No network latency
-
-### 2. Background Processing
-**Why async tasks?**
-- ✅ Responsive UI - Backend returns immediately
-- ✅ Better UX - Frontend can show progress
-- ✅ Scalable - Handle multiple concurrent uploads
-
-### 3. SQLite (Development) / PostgreSQL (Production)
-**Why dual support?**
-- ✅ Easy setup - SQLite for development
-- ✅ Production-ready - PostgreSQL for reliability
-- ✅ Flexible - Switch without code changes
-
-### 4. Markdown for Minutes
-**Why Markdown?**
-- ✅ User-editable - Easy for non-technical users
-- ✅ Future-proof - Can convert to any format
-- ✅ Version control - Plain text, git-friendly
-- ✅ Structured - Clear sections and formatting
-
----
-
-## 🧪 Testing
-
-### Run Tests
-```bash
-cd backend
-pytest tests/
-```
-
-### Manual Testing
-1. Upload test audio
-2. Monitor backend logs
-3. Check database for meeting status
-4. Download generated PDF
-5. Edit markdown and regenerate
-
----
-
-## 📊 Performance Metrics
-
-| Operation | Time | Notes |
-|-----------|------|-------|
-| Audio upload | 1-30s | Depends on file size |
-| Transcription | 1-5s | Whisper speed |
-| Summarization | 10-30s | LLM speed (model-dependent) |
-| PDF generation | 2s | ReportLab |
-| **Total** | **13-67s** | ~1 min for typical meeting |
-
-**Tips to optimize:**
-- Use faster Ollama model: `mistral` instead of `llama3`
-- Increase Ollama hardware allocation
-- Pre-download Whisper model
-
----
 
 ## 🔐 Security Features
 
@@ -501,27 +179,7 @@ pytest tests/
 3. **Improve docs** - Submit pull requests
 4. **Optimize code** - Performance improvements welcome
 
-### Code Style
-- Python: PEP 8
-- TypeScript: ESLint config
-- Commit messages: Conventional commits
-
 ---
-
-## 📞 Support
-
-### Getting Help
-1. **Read the docs** - 7 comprehensive guides included
-2. **Check troubleshooting** - 50+ common issues covered
-3. **Review error messages** - They now tell you how to fix issues
-4. **Check backend logs** - Clear stage-by-stage progress
-
-### Common Issues
-See: `backend/MINUTES_GENERATION_TROUBLESHOOTING.md`
-
----
-
-## 🎓 Learning Resources
 
 ### About the Technologies
 - **FastAPI**: https://fastapi.tiangolo.com
@@ -546,33 +204,9 @@ This project was created for the National AI Hackathon 2026.
 
 **Team Zapped** - National AI Hackathon 2026
 
-### Contributors
-- Architecture & Backend
-- Frontend & UI
-- AI/ML Integration
-- Documentation
 
 ---
 
-## 🚀 Ready to Start?
-
-### Quick Decision Tree
-
-```
-Are you new to the project?
-├─ YES → Read: START_HERE.md
-│
-Are you ready to set up?
-├─ YES → Read: backend/QUICK_START.md
-│
-Something not working?
-├─ YES → Read: backend/MINUTES_GENERATION_TROUBLESHOOTING.md
-│
-Want technical details?
-├─ YES → Read: MINUTES_GENERATION_ANALYSIS.md
-```
-
----
 
 ## 📈 Roadmap
 
@@ -584,35 +218,11 @@ Want technical details?
 - [ ] Email integration
 - [ ] Team collaboration features
 - [ ] API for third-party integrations
-- [ ] Mobile apps
-
----
-
-## ✅ Project Checklist
-
-- [x] Audio recording and upload
-- [x] Speech-to-text transcription
-- [x] AI summarization with LLM
-- [x] PDF generation
-- [x] User authentication
-- [x] Markdown editing
-- [x] Error handling & logging
-- [x] Comprehensive documentation
-- [x] Bug fixes and optimization
-- [x] Production-ready
 
 ---
 
 ## 🎉 Thank You!
 
-Thanks for using Meeting Minutes AI. We hope this tool saves you hours of administrative work and improves your meeting productivity!
-
-**Questions?** Check `START_HERE.md` for documentation navigation.
-
-**Ready to deploy?** Follow `backend/QUICK_START.md` for setup.
+Thanks for using EchoNote. We hope this tool saves you hours of administrative work and improves your meeting productivity!
 
 ---
-
-**Version**: 1.1 (with fixes applied)  
-**Last Updated**: June 2026  
-**Status**: ✅ Production Ready

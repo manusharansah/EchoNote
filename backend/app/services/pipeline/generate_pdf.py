@@ -14,6 +14,7 @@ Layout:
 """
 
 import os
+import re
 from datetime import datetime
 
 from reportlab.lib import colors
@@ -36,6 +37,7 @@ from reportlab.platypus import (
 INK       = colors.HexColor("#111827")   # near-black — headings & body
 INK_LIGHT = colors.HexColor("#6B7280")   # muted — labels, meta, due dates
 RULE      = colors.HexColor("#E5E7EB")   # light hairline dividers
+ACCENT    = colors.HexColor("#F3F4F6")   # very light grey — attendee chips bg
 
 
 # ── Public entry points ───────────────────────────────────
@@ -84,55 +86,70 @@ def _build_pdf(pdf_path: str, title: str, sections: dict) -> None:
     story += [
         Spacer(1, 0.5 * cm),
         Paragraph("MEETING MINUTES", S["meeting_label"]),
+        Spacer(1, 0.15 * cm),
         Paragraph(title, S["title"]),
+        Spacer(1, 0.2 * cm),
         Paragraph(now, S["meta"]),
-        Spacer(1, 0.5 * cm),
-        HRFlowable(width="100%", thickness=1.2, color=INK, spaceAfter=8),
-        Spacer(1, 0.3 * cm),
+        Spacer(1, 0.6 * cm),
+        HRFlowable(width="100%", thickness=1.5, color=INK, spaceAfter=0),
+        Spacer(1, 0.4 * cm),
     ]
 
     # ── Attendees ────────────────────────────────────────────
     attendees = sections.get("attendees") or []
     if attendees:
         story.append(_section_label("Attendees", S))
-        story.append(Paragraph("  ·  ".join(attendees), S["meta"]))
-        story.append(Spacer(1, 0.15 * cm))
+        story.append(Spacer(1, 0.1 * cm))
+        # Each attendee on a left-aligned line with a subtle bullet
+        for name in attendees:
+            story.append(Paragraph(f"<font color='#6B7280'>●</font>  {name}", S["attendee"]))
+        story.append(Spacer(1, 0.3 * cm))
 
     # ── Summary ──────────────────────────────────────────────
-    if sections.get("summary"):
+    summary_text = sections.get("summary") or ""
+    if summary_text:
         story.append(_section_label("Summary", S))
-        story.append(Paragraph(sections["summary"], S["body"]))
+        story.append(Spacer(1, 0.1 * cm))
+        # Split on double-newlines or single newlines to preserve paragraph breaks
+        for para in _split_paragraphs(summary_text):
+            story.append(Paragraph(para, S["body"]))
+        story.append(Spacer(1, 0.25 * cm))
 
     # ── Main Points Discussed ─────────────────────────────────
     agenda = sections.get("agenda_items") or []
     if agenda:
         story.append(_section_label("Main Points Discussed", S))
+        story.append(Spacer(1, 0.1 * cm))
         for i, item in enumerate(agenda, 1):
-            story.append(Paragraph(f"{i}.  {item}", S["numbered"]))
+            # Clean leading dashes/bullets the LLM might have added
+            clean = _clean_list_item(item)
+            story.append(Paragraph(f"<b>{i}.</b>  {clean}", S["numbered"]))
+            story.append(Spacer(1, 0.08 * cm))
+        story.append(Spacer(1, 0.2 * cm))
 
     # ── Key Decisions ─────────────────────────────────────────
     decisions = sections.get("key_decisions") or []
     if decisions:
         story.append(_section_label("Key Decisions", S))
+        story.append(Spacer(1, 0.1 * cm))
         for d in decisions:
-            story.append(Paragraph(f"–  {d}", S["bullet"]))
+            clean = _clean_list_item(d)
+            story.append(Paragraph(f"<font color='#111827'>–</font>  {clean}", S["bullet"]))
+            story.append(Spacer(1, 0.08 * cm))
+        story.append(Spacer(1, 0.2 * cm))
 
     # ── Action Items ──────────────────────────────────────────
-    # Strategy: try to keep the whole table on one page via KeepTogether.
-    # If the estimated height exceeds the usable page area we emit an explicit
-    # PageBreak first, so the table always starts at the top of a fresh page
-    # and never splits mid-row.
     actions = sections.get("action_items") or []
     if actions:
-        ROW_H    = 0.85 * cm   # conservative per-row height estimate
-        HEADER_H = 0.70 * cm   # column-header row
-        LABEL_H  = 0.90 * cm   # section label + hairline
-        USABLE_H = A4[1] - 5.5 * cm   # page height minus top+bottom margins
+        ROW_H    = 1.0 * cm
+        HEADER_H = 0.80 * cm
+        LABEL_H  = 1.10 * cm
+        USABLE_H = A4[1] - 5.5 * cm
 
         estimated_h = LABEL_H + HEADER_H + len(actions) * ROW_H
 
         action_block = (
-            [_section_label("Action Items", S), _action_header(S)]
+            [_section_label("Action Items", S), Spacer(1, 0.1 * cm), _action_header(S)]
             + [
                 _action_row(
                     item.get("owner", "TBD"),
@@ -142,25 +159,26 @@ def _build_pdf(pdf_path: str, title: str, sections: dict) -> None:
                 )
                 for item in actions
             ]
-            + [Spacer(1, 0.2 * cm)]
+            + [Spacer(1, 0.35 * cm)]
         )
 
         if estimated_h > USABLE_H:
-            # Too tall to guarantee fitting — start on a fresh page
             story.append(PageBreak())
             story.extend(action_block)
         else:
-            # Fits on one page — keep it together so it never splits mid-table
             story.append(KeepTogether(action_block))
 
     # ── Conclusion & Next Steps ───────────────────────────────
     next_steps = sections.get("next_steps") or []
     if next_steps:
         story.append(_section_label("Conclusion & Next Steps", S))
+        story.append(Spacer(1, 0.1 * cm))
         for step in next_steps:
-            story.append(Paragraph(f"→  {step}", S["bullet"]))
+            clean = _clean_list_item(step)
+            story.append(Paragraph(f"<font color='#6B7280'>→</font>  {clean}", S["bullet"]))
+            story.append(Spacer(1, 0.08 * cm))
 
-    story.append(Spacer(1, 1.2 * cm))
+    story.append(Spacer(1, 1.5 * cm))
 
     doc.build(story, onFirstPage=_footer, onLaterPages=_footer)
 
@@ -175,59 +193,72 @@ def _build_styles() -> dict:
             textColor=INK_LIGHT,
             fontName="Helvetica",
             alignment=TA_CENTER,
-            spaceAfter=5,
+            spaceAfter=0,
+            tracking=120,   # letter-spacing via wordSpace approximation
         ),
         "title": ParagraphStyle(
             "Title",
-            fontSize=26,
+            fontSize=24,
             textColor=INK,
             fontName="Helvetica-Bold",
             alignment=TA_CENTER,
-            leading=32,
-            spaceAfter=5,
+            leading=30,
+            spaceAfter=0,
         ),
         "meta": ParagraphStyle(
             "Meta",
-            fontSize=9,
+            fontSize=9.5,
             textColor=INK_LIGHT,
             fontName="Helvetica",
             alignment=TA_CENTER,
-            spaceAfter=2,
+            spaceAfter=0,
         ),
         "section_label": ParagraphStyle(
             "SectionLabel",
             fontSize=7.5,
             textColor=INK_LIGHT,
             fontName="Helvetica-Bold",
-            spaceBefore=18,
-            spaceAfter=5,
+            spaceBefore=22,
+            spaceAfter=4,
+            wordSpace=2,
         ),
         "body": ParagraphStyle(
             "Body",
+            fontSize=10.5,
+            textColor=INK,
+            fontName="Helvetica",
+            leading=18,         # generous line-height
+            spaceAfter=10,      # clear gap between paragraphs
+            alignment=TA_JUSTIFY,
+        ),
+        "attendee": ParagraphStyle(
+            "Attendee",
             fontSize=10,
             textColor=INK,
             fontName="Helvetica",
-            leading=17,
-            spaceAfter=6,
-            alignment=TA_JUSTIFY,
+            leading=16,
+            leftIndent=6,
+            spaceAfter=5,       # clear gap between each name
         ),
         "bullet": ParagraphStyle(
             "Bullet",
-            fontSize=10,
+            fontSize=10.5,
             textColor=INK,
             fontName="Helvetica",
-            leading=16,
-            leftIndent=14,
-            spaceAfter=4,
+            leading=17,
+            leftIndent=16,
+            firstLineIndent=0,
+            spaceAfter=6,       # breathing room between bullet items
         ),
         "numbered": ParagraphStyle(
             "Numbered",
-            fontSize=10,
+            fontSize=10.5,
             textColor=INK,
             fontName="Helvetica",
-            leading=16,
-            leftIndent=14,
-            spaceAfter=4,
+            leading=17,
+            leftIndent=20,
+            firstLineIndent=-4,
+            spaceAfter=6,       # breathing room between numbered items
         ),
         "col_header": ParagraphStyle(
             "ColHeader",
@@ -266,15 +297,39 @@ def _section_label(text: str, S: dict) -> KeepTogether:
     """SECTION LABEL + thin hairline rule, kept together."""
     return KeepTogether([
         Paragraph(text.upper(), S["section_label"]),
-        HRFlowable(width="100%", thickness=0.4, color=RULE, spaceAfter=5),
+        HRFlowable(width="100%", thickness=0.5, color=RULE, spaceAfter=4),
     ])
 
 
+def _split_paragraphs(text: str) -> list[str]:
+    """
+    Split a block of text into individual paragraphs.
+    Handles double-newlines, single newlines, and plain run-on text.
+    Returns a list of non-empty stripped strings.
+    """
+    # Normalise Windows line endings
+    text = text.replace("\r\n", "\n").replace("\r", "\n")
+    # Split on blank lines first
+    chunks = re.split(r"\n{2,}", text)
+    result = []
+    for chunk in chunks:
+        # Within each chunk, replace remaining newlines with a space
+        clean = chunk.replace("\n", " ").strip()
+        if clean:
+            result.append(clean)
+    return result or [text.strip()]
+
+
+def _clean_list_item(text: str) -> str:
+    """Strip leading bullets/dashes/numbers the LLM may have added."""
+    return re.sub(r"^[\s\-–—•*·▪▸►>]+\s*|\A\d+[.)]\s*", "", text).strip()
+
+
 def _col_widths() -> tuple:
-    usable = A4[0] - 5.6 * cm   # page width minus left+right margins
-    owner_w  = 3.2 * cm
-    due_w    = 3.0 * cm
-    task_w   = usable - owner_w - due_w
+    usable = A4[0] - 5.6 * cm
+    owner_w = 3.2 * cm
+    due_w   = 3.0 * cm
+    task_w  = usable - owner_w - due_w
     return owner_w, task_w, due_w
 
 
@@ -283,8 +338,8 @@ def _action_header(S: dict) -> Table:
     t = Table(
         [[
             Paragraph("OWNER", S["col_header"]),
-            Paragraph("TASK", S["col_header"]),
-            Paragraph("DUE", S["col_header"]),
+            Paragraph("TASK",  S["col_header"]),
+            Paragraph("DUE",   S["col_header"]),
         ]],
         colWidths=[ow, tw, dw],
     )
@@ -292,7 +347,7 @@ def _action_header(S: dict) -> Table:
         ("ALIGN",         (0, 0), (-1, -1), "LEFT"),
         ("VALIGN",        (0, 0), (-1, -1), "BOTTOM"),
         ("TOPPADDING",    (0, 0), (-1, -1), 0),
-        ("BOTTOMPADDING", (0, 0), (-1, -1), 4),
+        ("BOTTOMPADDING", (0, 0), (-1, -1), 5),
         ("LEFTPADDING",   (0, 0), (-1, -1), 0),
         ("RIGHTPADDING",  (0, 0), (-1, -1), 4),
         ("LINEBELOW",     (0, 0), (-1, -1), 0.8, INK),
@@ -305,16 +360,16 @@ def _action_row(owner: str, task: str, due: str, S: dict) -> Table:
     t = Table(
         [[
             Paragraph(owner or "TBD", S["action_owner"]),
-            Paragraph(task or "",     S["action_task"]),
-            Paragraph(due or "TBD",   S["action_due"]),
+            Paragraph(task  or "",    S["action_task"]),
+            Paragraph(due   or "TBD", S["action_due"]),
         ]],
         colWidths=[ow, tw, dw],
     )
     t.setStyle(TableStyle([
         ("ALIGN",         (0, 0), (-1, -1), "LEFT"),
         ("VALIGN",        (0, 0), (-1, -1), "TOP"),
-        ("TOPPADDING",    (0, 0), (-1, -1), 6),
-        ("BOTTOMPADDING", (0, 0), (-1, -1), 6),
+        ("TOPPADDING",    (0, 0), (-1, -1), 8),
+        ("BOTTOMPADDING", (0, 0), (-1, -1), 8),
         ("LEFTPADDING",   (0, 0), (-1, -1), 0),
         ("RIGHTPADDING",  (0, 0), (-1, -1), 4),
         ("LINEBELOW",     (0, 0), (-1, -1), 0.3, RULE),

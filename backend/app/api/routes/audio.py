@@ -85,6 +85,7 @@ async def upload_audio(
     # 4. Update meeting record
     meeting.audio_path = audio_path
     meeting.status     = MeetingStatus.PENDING
+    meeting.error_message = None  # Clear any previous errors
     db.commit()
     db.refresh(meeting)
 

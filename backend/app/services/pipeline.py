@@ -17,7 +17,7 @@ from datetime import datetime, timezone
 from app.db.database import SessionLocal
 from app.models.meeting import Meeting, MeetingStatus
 from app.services.whisper_service import transcribe_audio
-from app.services.ollama_service import summarize_transcript
+from app.services.ollama_service import summarize_transcript, check_ollama_health
 from app.services.pdf_generator import generate_pdf_from_markdown
 
 logger = logging.getLogger(__name__)
@@ -35,14 +35,31 @@ def run_processing_pipeline(meeting_id: int) -> None:
             logger.error(f"Pipeline: meeting {meeting_id} not found")
             return
 
+        # ── Pre-flight checks ─────────────────────────────────────────────────
+        logger.info(f"[Meeting {meeting_id}] Pre-flight: Checking Ollama health...")
+        if not check_ollama_health():
+            _fail(db, meeting, 
+                "Ollama service is not running or unreachable. "
+                "Make sure Ollama is installed and running at the configured URL. "
+                "See https://ollama.ai for installation instructions.")
+            return
+
         # ── Stage 1: Transcribe ───────────────────────────────────────────────
         logger.info(f"[Meeting {meeting_id}] Stage 1: Transcribing audio...")
         _set_status(db, meeting, MeetingStatus.TRANSCRIBING)
 
         try:
+            if not meeting.audio_path:
+                raise RuntimeError("No audio file path found")
             transcript = transcribe_audio(meeting.audio_path)
         except Exception as exc:
             _fail(db, meeting, f"Transcription failed: {exc}")
+            return
+
+        if not transcript or not transcript.strip():
+            _fail(db, meeting, 
+                "Transcription resulted in empty text. "
+                "The audio may be too short, too quiet, or in an unsupported language.")
             return
 
         meeting.transcript = transcript
@@ -57,6 +74,12 @@ def run_processing_pipeline(meeting_id: int) -> None:
             markdown = summarize_transcript(transcript)
         except Exception as exc:
             _fail(db, meeting, f"Summarization failed: {exc}")
+            return
+
+        if not markdown or not markdown.strip():
+            _fail(db, meeting, 
+                "Ollama returned empty markdown. "
+                "This may indicate a problem with the Ollama model. Try restarting Ollama or pulling the model again.")
             return
 
         meeting.markdown = markdown

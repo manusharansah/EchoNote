@@ -72,20 +72,43 @@ def summarize_transcript(transcript: str) -> str:
     }
 
     # Generous timeout — long transcripts can take a while locally
-    with httpx.Client(timeout=300.0) as client:
-        response = client.post(url, json=payload)
-
-    if response.status_code != 200:
+    try:
+        with httpx.Client(timeout=300.0) as client:
+            response = client.post(url, json=payload)
+    except httpx.ConnectError as e:
         raise RuntimeError(
-            f"Ollama returned HTTP {response.status_code}: {response.text[:300]}"
+            f"Cannot connect to Ollama at {settings.OLLAMA_BASE_URL}. "
+            f"Make sure Ollama is running. Error: {str(e)}"
+        )
+    except httpx.TimeoutException:
+        raise RuntimeError(
+            f"Ollama request timed out. The model {settings.OLLAMA_MODEL} may be too slow "
+            f"or the transcript too long. Try a faster model (e.g., 'mistral' or 'neural-chat')."
         )
 
-    data = response.json()
+    if response.status_code != 200:
+        error_detail = response.text[:500]
+        raise RuntimeError(
+            f"Ollama API error (HTTP {response.status_code}): {error_detail}\n"
+            f"Make sure model '{settings.OLLAMA_MODEL}' is pulled. "
+            f"Run: ollama pull {settings.OLLAMA_MODEL}"
+        )
+
+    try:
+        data = response.json()
+    except json.JSONDecodeError as e:
+        raise RuntimeError(f"Failed to parse Ollama response as JSON: {str(e)}")
 
     # Ollama /api/chat response shape: {"message": {"role": "assistant", "content": "..."}}
+    if "message" not in data:
+        raise RuntimeError(f"Unexpected Ollama response format: {str(data)[:200]}")
+    
     content = data.get("message", {}).get("content", "")
-    if not content:
-        raise RuntimeError("Ollama returned empty content")
+    if not content or not content.strip():
+        raise RuntimeError(
+            "Ollama returned empty response. The model may have failed to generate content. "
+            "Try a different model or verify Ollama is working correctly."
+        )
 
     return content.strip()
 

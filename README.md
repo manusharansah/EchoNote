@@ -1,4 +1,4 @@
-# 🎯 Meeting Minutes AI - National AI Hackathon 2026
+# 🎯 EchoNote - National AI Hackathon 2026
 
 > **Team Zapped** - AI-powered meeting transcription and minutes generation  
 > **Technologies**: FastAPI, Whisper, Ollama, ReportLab, React
@@ -7,7 +7,7 @@
 
 ## 📱 Project Overview
 
-**Meeting Minutes AI** is an intelligent application that automatically transcribes meeting audio, generates structured meeting minutes using AI, and produces professional PDF documents—all without requiring any manual intervention.
+**EchoNote** is an intelligent application that automatically transcribes meeting audio, generates structured meeting minutes using AI, and produces professional PDF documents—all without requiring any manual intervention.
 
 ### Use Cases
 - 📞 Remote team meetings
@@ -41,7 +41,7 @@ This results in:
 
 ## ✅ Our Solution
 
-### Meeting Minutes AI: A Complete Workflow
+### EchoNote: A Complete Workflow
 
 ```
 📱 User Records Meeting
@@ -223,6 +223,6 @@ This project was created for the National AI Hackathon 2026.
 
 ## 🎉 Thank You!
 
-Thanks for using Meeting Minutes AI. We hope this tool saves you hours of administrative work and improves your meeting productivity!
+Thanks for using EchoNote. We hope this tool saves you hours of administrative work and improves your meeting productivity!
 
 ---

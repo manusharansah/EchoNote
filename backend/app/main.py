@@ -29,7 +29,7 @@ Base.metadata.create_all(bind=engine)
 
 # ── FastAPI app ────────────────────────────────────────────
 app = FastAPI(
-    title="Meeting Minutes AI",
+    title="EchoNote",
     description="Automatic meeting transcription, summarisation, and PDF generation.",
     version="1.0.0",
     docs_url="/docs",
@@ -85,7 +85,7 @@ async def global_exception_handler(request: Request, exc: Exception):
 @app.on_event("startup")
 async def startup_checks():
     import httpx
-    logger.info("Meeting Minutes AI starting up...")
+    logger.info("EchoNote starting up...")
 
     # Check Ollama connectivity
     try:

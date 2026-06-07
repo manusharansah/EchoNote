@@ -49,7 +49,7 @@ export function AuthShell({
             — in minutes.
           </h2>
           <p className="text-indigo-100/80 text-[15px] leading-relaxed">
-            Upload your audio and MeetingIQ handles the rest: transcription,
+            Upload your audio and EchoNote handles the rest: transcription,
             speaker labels, structured summaries, action items and exportable
             PDFs.
           </p>
@@ -70,7 +70,7 @@ export function AuthShell({
         </div>
 
         <p className="relative text-xs text-indigo-200/60">
-          © {new Date().getFullYear()} MeetingIQ. Built for teams that ship.
+          © {new Date().getFullYear()} EchoNote. Built for teams that ship.
         </p>
       </div>
 

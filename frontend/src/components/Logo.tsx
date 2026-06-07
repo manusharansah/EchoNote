@@ -26,7 +26,7 @@ export function Logo({ size = "md", showWordmark = true }: LogoProps) {
       </div>
       {showWordmark && (
         <span className={`font-display font-bold tracking-tight text-slate-900 ${s.text}`}>
-          MeetingIQ
+          EchoNote
         </span>
       )}
     </div>

@@ -332,7 +332,7 @@ function EmptyState({
       </h3>
       <p className="mt-1.5 max-w-sm text-sm text-slate-500">
         {filter === "all"
-          ? "Upload a recording and MeetingIQ will turn it into polished minutes automatically."
+          ? "Upload a recording and EchoNote will turn it into polished minutes automatically."
           : `You don't have any ${filter} meetings right now.`}
       </p>
       {filter === "all" && (

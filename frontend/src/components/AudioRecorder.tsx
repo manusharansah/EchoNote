@@ -136,7 +136,7 @@ export default function AudioRecorder({ onAudioReady }: Props) {
         </div>
         <p className="text-sm font-medium text-slate-900">Record audio in browser</p>
         <p className="mt-1 text-xs text-slate-500">
-          MeetingIQ records locally and uploads when you stop.
+          EchoNote records locally and uploads when you stop.
         </p>
         <button onClick={startRecording} className="btn-primary mt-5">
           <Mic size={15} />

@@ -123,7 +123,7 @@ export default function SignIn() {
       </p>
 
       <p className="mt-10 text-center text-[11px] leading-relaxed text-slate-400">
-        By using MeetingIQ, you agree to process only meetings where
+        By using EchoNote, you agree to process only meetings where
         participants have provided consent.
       </p>
     </AuthShell>

@@ -106,53 +106,7 @@ This results in:
 ## 🏗️ Architecture
 
 ### High-Level Flow
-
-```
-┌─────────────┐
-│   Frontend  │ (React + Vite)
-│  - Record   │
-│  - Upload   │
-│  - Edit     │
-└──────┬──────┘
-       │ HTTP
-       ↓
-┌──────────────────────────────────────┐
-│         FastAPI Backend              │
-│  ┌────────────────────────────────┐  │
-│  │ Audio Upload Endpoint          │  │
-│  │ - Validate audio               │  │
-│  │ - Store to disk                │  │
-│  └────────┬───────────────────────┘  │
-│           ↓                           │
-│  ┌────────────────────────────────┐  │
-│  │ Background Pipeline            │  │
-│  │ ├─ Stage 1: Transcribe         │  │
-│  │ │  (Whisper)                   │  │
-│  │ ├─ Stage 2: Summarize          │  │
-│  │ │  (Ollama LLM)                │  │
-│  │ └─ Stage 3: Generate PDF       │  │
-│  │    (ReportLab)                 │  │
-│  └────────┬───────────────────────┘  │
-│           ↓                           │
-│  ┌────────────────────────────────┐  │
-│  │ Status Endpoints               │  │
-│  │ - Check progress               │  │
-│  │ - Get markdown                 │  │
-│  │ - Download PDF                 │  │
-│  └────────────────────────────────┘  │
-│           ↑                           │
-│           │ Poll every 2s             │
-│           └───────────────────────────┘
-│                                       │
-│  Database: SQLite                    │
-│  - Users, Meetings, Status Tracking  │
-└──────────────────────────────────────┘
-       ↑                ↑
-       │ HTTP          │ HTTP
-       │                │
-   Frontend          External Services
-                     (Optional: OpenAI API)
-```
+![System Architecture](System%20Architecture.png)
 
 ### Database Schema
 

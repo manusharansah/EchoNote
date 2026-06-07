@@ -1,0 +1,33 @@
+.toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 2px;
+  padding: 8px 12px;
+  background: var(--ink-mid);
+  border-bottom: 1px solid var(--border);
+  border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+.btn {
+  background: none;
+  border: none;
+  border-radius: var(--radius-sm);
+  color: var(--dust);
+  width: 30px; height: 30px;
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+}
+.btn:hover { background: var(--ink-soft); color: var(--cream); }
+.btn.active { background: var(--amber-soft); color: var(--amber); }
+
+.sep {
+  width: 1px; height: 20px;
+  background: var(--border);
+  margin: 0 4px;
+  flex-shrink: 0;
+}

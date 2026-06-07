@@ -102,23 +102,6 @@ This results in:
 - No re-processing needed
 
 ---
-- ✅ **One-click recording** - Native browser recording
-- ✅ **Automatic processing** - No manual steps required
-- ✅ **Live progress tracking** - See pipeline status in real-time
-- ✅ **Professional output** - PDF-ready minutes
-- ✅ **Easy editing** - Markdown editor with live preview
-- ✅ **Fast results** - 30-60 seconds per meeting
-- ✅ **Privacy-first** - Local processing, no data leaks
-
-- 🔧 **Well-documented** - 7 comprehensive guides
-- 📚 **Clean architecture** - Modular, easy to extend
-- 🧪 **Error handling** - Comprehensive error messages
-- 📊 **Configurable** - Environment-based settings
-- 🔐 **Secure** - JWT auth, input validation
-- 🚀 **Scalable** - Background task processing
-- 📝 **Logged** - Detailed pipeline logs
-
----
 
 ## 🏗️ Architecture
 
